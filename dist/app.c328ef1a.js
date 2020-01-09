@@ -125,22 +125,19 @@ var define;
 var define;
 !function(e,s){"object"==typeof exports&&"undefined"!=typeof module?module.exports=s(require("dayjs")):"function"==typeof define&&define.amd?define(["dayjs"],s):e.dayjs_locale_es=s(e.dayjs)}(this,function(e){"use strict";e=e&&e.hasOwnProperty("default")?e.default:e;var s={name:"es",monthsShort:"ene_feb_mar_abr_may_jun_jul_ago_sep_oct_nov_dic".split("_"),weekdays:"domingo_lunes_martes_miércoles_jueves_viernes_sábado".split("_"),weekdaysShort:"dom._lun._mar._mié._jue._vie._sáb.".split("_"),weekdaysMin:"do_lu_ma_mi_ju_vi_sá".split("_"),months:"Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre".split("_"),weekStart:1,formats:{LT:"H:mm",LTS:"H:mm:ss",L:"DD/MM/YYYY",LL:"D [de] MMMM [de] YYYY",LLL:"D [de] MMMM [de] YYYY H:mm",LLLL:"dddd, D [de] MMMM [de] YYYY H:mm"},relativeTime:{future:"en %s",past:"hace %s",s:"unos segundos",m:"un minuto",mm:"%d minutos",h:"una hora",hh:"%d horas",d:"un día",dd:"%d días",M:"un mes",MM:"%d meses",y:"un año",yy:"%d años"},ordinal:function(e){return e+"º"}};return e.locale(s,null,!0),s});
 
-},{"dayjs":"../node_modules/dayjs/dayjs.min.js"}],"app.js":[function(require,module,exports) {
+},{"dayjs":"../node_modules/dayjs/dayjs.min.js"}],"core/audio-visualizer.js":[function(require,module,exports) {
 "use strict";
 
-var _dayjs = _interopRequireDefault(require("dayjs"));
-
-require("dayjs/locale/es");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-_dayjs.default.locale('es');
 
 var AudioVisualizer =
 /*#__PURE__*/
@@ -194,6 +191,20 @@ function () {
   return AudioVisualizer;
 }();
 
+var _default = AudioVisualizer;
+exports.default = _default;
+},{}],"core/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.initVisualizer = void 0;
+
+var _audioVisualizer = _interopRequireDefault(require("./audio-visualizer"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var visualMainElement = document.querySelector('main');
 var visualValueCount = 16;
 var visualElements;
@@ -211,7 +222,7 @@ var createDOMElements = function createDOMElements() {
 
 createDOMElements();
 
-var init = function init() {
+var initVisualizer = function initVisualizer() {
   // Creating initial DOM elements
   var audioContext = new AudioContext();
 
@@ -258,19 +269,33 @@ var init = function init() {
     visualMainElement.innerText = 'Please allow access to your microphone in order to see this demo.\nNothing bad is going to happen... hopefully :P';
   };
 
-  var a = new AudioVisualizer(audioContext, processFrame, processError);
+  var a = new _audioVisualizer.default(audioContext, processFrame, processError);
 };
 
+exports.initVisualizer = initVisualizer;
+},{"./audio-visualizer":"core/audio-visualizer.js"}],"app.js":[function(require,module,exports) {
+"use strict";
+
+var _dayjs = _interopRequireDefault(require("dayjs"));
+
+require("dayjs/locale/es");
+
+var _core = require("./core");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import visualizer from './core/visualizer';
+_dayjs.default.locale('es'); // visualizer();
+
+
 window.onload = function () {
-  var speech = new p5.Speech(function () {
-    console.log(speech.listVoices());
-  });
+  var speech = new p5.Speech();
 
   function voiceReady() {
     console.log('voice ready'); //console.log(speech.voices);
 
     speech.setVoice('Juan');
-    init();
+    (0, _core.initVisualizer)();
   }
 
   speech.onLoad = voiceReady;
@@ -346,42 +371,40 @@ window.onload = function () {
 
   if (annyang) {
     // Let's define a command.
-    annyang.setLanguage('es-MX'); // const commands = {
-    //   'commands': loc,
-    //   'hola (jarvis)': hi,
-    //   'bye (jarvis)': bye,
-    //   'busca *something': search,
-    //   'busca la página *website': searchWebsite,
-    //   'repite *saysome': saysome,
-    //   'cierra la pestaña': ctab,
-    //   'qué hora es': date,
-    //   // 'cuéntame un chiste': joke,
-    //   // 'cuéntame otro chiste': anotherjoke,
-    //   'cómo estás': how,
-    //   'quién soy yo': who
-    // };
-    // // Add our commands to annyang
-    // annyang.addCommands(commands);
+    annyang.setLanguage('es-MX');
+    var commands = {
+      'commands': loc,
+      'hola (jarvis)': hi,
+      'bye (jarvis)': bye,
+      'busca *something': search,
+      'busca la página *website': searchWebsite,
+      'repite *saysome': saysome,
+      'cierra la pestaña': ctab,
+      'qué hora es': date,
+      // 'cuéntame un chiste': joke,
+      // 'cuéntame otro chiste': anotherjoke,
+      'cómo estás': how,
+      'quién soy yo': who
+    }; // Add our commands to annyang
 
-    annyang.debug(true); // annyang.addCallback('resultMatch', function(userSaid, commandText, phrases) {
-    //   console.log('resultMatch');
-    //   console.log(userSaid); // sample output: 'hello'
-    //   console.log(commandText); // sample output: 'hello (there)'
-    //   console.log(phrases); // sample output: ['hello', 'halo', 'yellow', 'polo', 'hello kitty']
-    // });
-
+    annyang.addCommands(commands);
+    annyang.debug(true);
+    annyang.addCallback('resultMatch', function (userSaid, commandText, phrases) {
+      console.log('resultMatch');
+      console.log(userSaid);
+      console.log(commandText);
+      console.log(phrases);
+    });
     annyang.addCallback('result', function (userSaid, commandText, phrases) {
       console.log('resultMatch');
-      console.log(userSaid); // sample output: 'hello'
-
-      console.log(commandText); // sample output: 'hello (there)'
-
-      console.log(phrases); // sample output: ['hello', 'halo', 'yellow', 'polo', 'hello kitty']
+      console.log(userSaid);
+      console.log(commandText);
+      console.log(phrases);
     });
     annyang.start();
   }
 };
-},{"dayjs":"../node_modules/dayjs/dayjs.min.js","dayjs/locale/es":"../node_modules/dayjs/locale/es.js"}],"../../../.nvm/versions/node/v8.11.2/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"dayjs":"../node_modules/dayjs/dayjs.min.js","dayjs/locale/es":"../node_modules/dayjs/locale/es.js","./core":"core/index.js"}],"../../../.nvm/versions/node/v8.11.2/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
