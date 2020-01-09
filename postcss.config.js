@@ -6,6 +6,6 @@ module.exports = {
         "src/index.html"
       ]
     }),
-    autoprefixer,
+    require("autoprefixer"),
   ],
 };
