@@ -1,10 +1,13 @@
 {
   "name": "pa",
+  "homepage": "http://joseluismurillorios.github.io/pa",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "parcel src/index.html",
+    "predeploy": "parcel build src/index.html",
+    "deploy": "gh-pages -d build"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +18,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.7.0",
+    "gh-pages": "^2.2.0",
     "postcss-uncss": "^0.17.0"
   },
   "dependencies": {

@@ -180,7 +180,7 @@ var _default = function _default() {
   }
 
   var loc = function loc() {
-    alert("List of commands-\n'hello (jarvis)': To give greetings\n'goodbye (jarvis)': to tell goodbye\n'search for *something': to google search'website search *website': to search a Website\n'repeat *saysome': to repeat what you say\n'close tab': go back to jarvis tab\n'what is the time': tells the time and daten'tell me a joke': tells a cheesy joke");
+    alert("List of commands-\n'hello (chuy)': To give greetings\n'goodbye (chuy)': to tell goodbye\n'search for *something': to google search'website search *website': to search a Website\n'repeat *saysome': to repeat what you say\n'close tab': go back to chuy tab\n'what is the time': tells the time and daten'tell me a joke': tells a cheesy joke");
   };
 
   var bye = function bye() {
@@ -227,17 +227,17 @@ var _default = function _default() {
     annyang.setLanguage('es-MX');
     var commands = {
       'commands': loc,
-      '(otro) hola (jarvis)': hi,
-      'adiós (jarvis)': bye,
-      '(jarvis) busca *something': search,
-      '(jarvis) abre *website': searchWebsite,
+      '(otro) hola (chuy)': hi,
+      'adiós (chuy)': bye,
+      '(chuy) busca *something': search,
+      '(chuy) abre *website': searchWebsite,
       'repite *saysome': saysome,
       'cierra la pestaña': ctab,
       'qué hora es': hour,
       'qué fecha es': date,
       // 'cuéntame un chiste': joke,
       // 'cuéntame otro chiste': anotherjoke,
-      '(jarvis) cómo estás': how,
+      '(chuy) cómo estás': how,
       'quién soy yo': who
     }; // Add our commands to annyang
 
