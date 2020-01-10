@@ -1,4 +1,5 @@
 import loopVisualizer from './visualizer';
+import { tween } from 'shifty';
 
 export default () => {
 	/**
@@ -72,8 +73,25 @@ export default () => {
 		// container.appendChild(stats.domElement);
 
 		//init listeners
-		$('#loadSample').click(loadSampleAudio);
+		// $('#loadSample').click(loadSampleAudio);
+		$(document).click(() => {
+			initAudio();
+		});
 		$(document).mousemove(onDocumentMouseMove);
+		$(document).mouseleave(() => {
+			tween({
+				from: { x: mouseX, y: mouseY },
+				to: { x: -0.5, y: -0.5 },
+				duration: 1500,
+				easing: 'easeOutQuad',
+				step: (state) => {
+					mouseX = state.x;
+					mouseY = state.y;
+				},
+			}).then(
+				() => console.log('All done!')
+			);
+		});
 		$(window).resize(onWindowResize);
 		document.addEventListener('drop', onDocumentDrop, false);
 		document.addEventListener('dragover', onDocumentDragOver, false);
@@ -81,54 +99,54 @@ export default () => {
 		onWindowResize(null);
 	}
 
-	function loadSampleAudio() {
-		$('#loading').text('loading...');
+	// function loadSampleAudio() {
+	// 	$('#loading').text('loading...');
 
-		audioContext = new window.AudioContext();
+	// 	audioContext = new window.AudioContext();
 
-		source = audioContext.createBufferSource();
-		analyser = audioContext.createAnalyser();
-		analyser.fftSize = 1024;
-		analyser.smoothingTimeConstant = 0.1;
+	// 	source = audioContext.createBufferSource();
+	// 	analyser = audioContext.createAnalyser();
+	// 	analyser.fftSize = 1024;
+	// 	analyser.smoothingTimeConstant = 0.1;
 
-		// Connect audio processing graph
-		source.connect(analyser);
-		analyser.connect(audioContext.destination);
+	// 	// Connect audio processing graph
+	// 	source.connect(analyser);
+	// 	analyser.connect(audioContext.destination);
 
-		loadAudioBuffer('audio/EMDCR.mp3');
-	}
+	// 	// loadAudioBuffer('audio/EMDCR.mp3');
+	// }
 
-	function loadAudioBuffer(url) {
-		// Load asynchronously
-		const request = new XMLHttpRequest();
-		request.open('GET', url, true);
-		request.responseType = 'arraybuffer';
+	// function loadAudioBuffer(url) {
+	// 	// Load asynchronously
+	// 	const request = new XMLHttpRequest();
+	// 	request.open('GET', url, true);
+	// 	request.responseType = 'arraybuffer';
 
-		request.onload = () => {
-			audioContext.decodeAudioData(
-				request.response,
-				buffer => {
-					audioBuffer = buffer;
-					finishLoad();
-				},
-				e => {
-					console.log(e);
-				}
-			);
-		};
-		request.send();
-	}
+	// 	request.onload = () => {
+	// 		audioContext.decodeAudioData(
+	// 			request.response,
+	// 			buffer => {
+	// 				audioBuffer = buffer;
+	// 				finishLoad();
+	// 			},
+	// 			e => {
+	// 				console.log(e);
+	// 			}
+	// 		);
+	// 	};
+	// 	request.send();
+	// }
 
-	function finishLoad() {
-		source.buffer = audioBuffer;
-		source.loop = true;
-		source.start(0.0);
-		startViz();
-	}
+	// function finishLoad() {
+	// 	source.buffer = audioBuffer;
+	// 	source.loop = true;
+	// 	source.start(0.0);
+	// 	startViz();
+	// }
 
 	function onDocumentMouseMove({ clientX, clientY }) {
-		mouseX = (clientX - windowHalfX) * 0.5;
-		mouseY = (clientY - windowHalfY) * 0.5;
+		mouseX = (clientX - windowHalfX) * -0.5;
+		mouseY = (clientY - windowHalfY) * -0.5;
 	}
 
 	function onWindowResize(event) {
@@ -194,35 +212,45 @@ export default () => {
 	}
 
 	function initAudio(data) {
-		audioContext = new window.AudioContext();
-		source = audioContext.createBufferSource();
+		navigator.mediaDevices
+    .getUserMedia({ audio: true, video: false })
+    .then((stream) => {
+			audioContext = new window.AudioContext();
+      // const gainNode = context.createGain();
 
-		if (audioContext.decodeAudioData) {
-			audioContext.decodeAudioData(
-				data,
-				buffer => {
-					source.buffer = buffer;
-					createAudio();
-				},
-				e => {
-					console.log(e);
-					$('#loading').text('cannot decode mp3');
-				}
-			);
-		} else {
-			source.buffer = audioContext.createBuffer(data, false);
+			source = audioContext.createMediaStreamSource(stream);
 			createAudio();
-		}
+		});
+		// audioContext = new window.AudioContext();
+		
+		// source = audioContext.createBufferSource();
+
+		// if (audioContext.decodeAudioData) {
+		// 	audioContext.decodeAudioData(
+		// 		data,
+		// 		buffer => {
+		// 			source.buffer = buffer;
+		// 			createAudio();
+		// 		},
+		// 		e => {
+		// 			console.log(e);
+		// 			$('#loading').text('cannot decode mp3');
+		// 		}
+		// 	);
+		// } else {
+		// 	source.buffer = audioContext.createBuffer(data, false);
+		// 	createAudio();
+		// }
 	}
 
 	function createAudio() {
 		analyser = audioContext.createAnalyser();
 		analyser.fftSize = 1024;
 		analyser.smoothingTimeConstant = 0.1;
-		source.connect(audioContext.destination);
+		// source.connect(audioContext.destination);
 		source.connect(analyser);
-		source.start(0);
-		source.loop = true;
+		// source.start(0);
+		// source.loop = true;
 
 		startViz();
 	}

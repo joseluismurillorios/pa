@@ -111,9 +111,12 @@ const LoopVisualizer = (scene, analyser) => {
       sum += freqByteData[i];
     }
     const aveLevel = sum / BIN_COUNT;
+    // console.log('aveLevel', aveLevel);
     const scaled_average = (aveLevel / 256) * VOL_SENS; //256 is the highest a level can be
-    levels.push(scaled_average);
-
+    // console.log('scaled_average', scaled_average * 2);
+    levels.push(scaled_average * 2);
+    // levels.push(scaled_average);
+    
     //read waveform into timeByteData
     //waves.push(timeByteData);
 
@@ -143,7 +146,8 @@ const LoopVisualizer = (scene, analyser) => {
       const ringId = RINGCOUNT - i - 1;
 
 
-      const normLevel = levels[ringId] + 0.01; //avoid scaling by 0
+      const normLevel = levels[ringId] + 0.3; //avoid scaling by 0
+      // console.log(normLevel);
       const hue = colors[i];
 
       materials[i].color.setHSL(hue, 1, normLevel);
