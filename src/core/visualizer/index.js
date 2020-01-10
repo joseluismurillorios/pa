@@ -25,6 +25,7 @@ export default () => {
 	let audioBuffer;
 	let audioContext;
 	let started = false;
+	let mic = false;
 
 	$(document).ready(() => {
 		//Chrome is only browser to currently support Web Audio API
@@ -75,7 +76,7 @@ export default () => {
 		//init listeners
 		// $('#loadSample').click(loadSampleAudio);
 		$(document).click(() => {
-			initAudio();
+			initMic();
 		});
 		$(document).mousemove(onDocumentMouseMove);
 		$(document).mouseleave(() => {
@@ -211,7 +212,12 @@ export default () => {
 		reader.readAsArrayBuffer(droppedFiles[0]);
 	}
 
-	function initAudio(data) {
+	function initMic() {
+		if (source) {
+			source.disconnect();
+			LoopVisualizer.remove();
+		}
+
 		navigator.mediaDevices
     .getUserMedia({ audio: true, video: false })
     .then((stream) => {
@@ -219,37 +225,51 @@ export default () => {
       // const gainNode = context.createGain();
 
 			source = audioContext.createMediaStreamSource(stream);
+			mic = true;
 			createAudio();
 		});
-		// audioContext = new window.AudioContext();
-		
-		// source = audioContext.createBufferSource();
+	}
 
-		// if (audioContext.decodeAudioData) {
-		// 	audioContext.decodeAudioData(
-		// 		data,
-		// 		buffer => {
-		// 			source.buffer = buffer;
-		// 			createAudio();
-		// 		},
-		// 		e => {
-		// 			console.log(e);
-		// 			$('#loading').text('cannot decode mp3');
-		// 		}
-		// 	);
-		// } else {
-		// 	source.buffer = audioContext.createBuffer(data, false);
+	function initAudio(data) {
+		// navigator.mediaDevices
+    // .getUserMedia({ audio: true, video: false })
+    // .then((stream) => {
+		// 	audioContext = new window.AudioContext();
+
+		// 	source = audioContext.createMediaStreamSource(stream);
 		// 	createAudio();
-		// }
+		// });
+		audioContext = new window.AudioContext();
+		
+		source = audioContext.createBufferSource();
+
+		if (audioContext.decodeAudioData) {
+			audioContext.decodeAudioData(
+				data,
+				buffer => {
+					source.buffer = buffer;
+					source.connect(audioContext.destination);
+					source.start(0);
+					mic = false;
+					createAudio();
+				},
+				e => {
+					console.log(e);
+					$('#loading').text('cannot decode mp3');
+				}
+			);
+		} else {
+			source.buffer = audioContext.createBuffer(data, false);
+			mic = false;
+			createAudio();
+		}
 	}
 
 	function createAudio() {
 		analyser = audioContext.createAnalyser();
 		analyser.fftSize = 1024;
 		analyser.smoothingTimeConstant = 0.1;
-		// source.connect(audioContext.destination);
 		source.connect(analyser);
-		// source.start(0);
 		// source.loop = true;
 
 		startViz();
@@ -258,7 +278,7 @@ export default () => {
 	function startViz() {
 		$('#loading').hide();
 
-		LoopVisualizer = loopVisualizer(scene, analyser);
+		LoopVisualizer = loopVisualizer(scene, analyser, mic);
 		LoopVisualizer.init();
 
 		if (!started) {

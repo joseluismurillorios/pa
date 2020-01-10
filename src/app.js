@@ -7,11 +7,15 @@ import visualizer from './core/visualizer';
 dayjs.locale('es');
 
 // visualizer();
+let started = false;
 
 window.onload = () => {
   window.addEventListener('click', () => {
     // initVisualizer();
-    visualizer();
-    speech();
+    if (!started) {
+      visualizer();
+      speech();
+      started = true;
+    }
   })
 }

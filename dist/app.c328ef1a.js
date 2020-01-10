@@ -331,7 +331,7 @@ var _improvedNoise = _interopRequireDefault(require("./improvedNoise"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var LoopVisualizer = function LoopVisualizer(scene, analyser) {
+var LoopVisualizer = function LoopVisualizer(scene, analyser, mic) {
   var RINGCOUNT = 60;
   var SEPARATION = 30;
   var INIT_RADIUS = 50;
@@ -420,7 +420,8 @@ var LoopVisualizer = function LoopVisualizer(scene, analyser) {
     var scaled_average = aveLevel / 256 * VOL_SENS; //256 is the highest a level can be
     // console.log('scaled_average', scaled_average * 2);
 
-    levels.push(scaled_average * 2); // levels.push(scaled_average);
+    var aveOffset = mic ? 2 : 1;
+    levels.push(scaled_average * aveOffset); // levels.push(scaled_average);
     //read waveform into timeByteData
     //waves.push(timeByteData);
     //get noise color posn
@@ -442,7 +443,8 @@ var LoopVisualizer = function LoopVisualizer(scene, analyser) {
 
     for (i = 0; i < RINGCOUNT; i++) {
       var ringId = RINGCOUNT - i - 1;
-      var normLevel = levels[ringId] + 0.3; //avoid scaling by 0
+      var offset = mic ? 0.3 : 0.01;
+      var normLevel = levels[ringId] + offset; //avoid scaling by 0
       // console.log(normLevel);
 
       var hue = colors[i];
@@ -524,6 +526,7 @@ var _default = function _default() {
   var audioBuffer;
   var audioContext;
   var started = false;
+  var mic = false;
   $(document).ready(function () {
     //Chrome is only browser to currently support Web Audio API
     var is_webgl = function () {
@@ -569,7 +572,7 @@ var _default = function _default() {
 
 
     $(document).click(function () {
-      initAudio();
+      initMic();
     });
     $(document).mousemove(onDocumentMouseMove);
     $(document).mouseleave(function () {
@@ -699,7 +702,12 @@ var _default = function _default() {
     reader.readAsArrayBuffer(droppedFiles[0]);
   }
 
-  function initAudio(data) {
+  function initMic() {
+    if (source) {
+      source.disconnect();
+      LoopVisualizer.remove();
+    }
+
     navigator.mediaDevices.getUserMedia({
       audio: true,
       video: false
@@ -707,41 +715,52 @@ var _default = function _default() {
       audioContext = new window.AudioContext(); // const gainNode = context.createGain();
 
       source = audioContext.createMediaStreamSource(stream);
+      mic = true;
       createAudio();
-    }); // audioContext = new window.AudioContext();
-    // source = audioContext.createBufferSource();
-    // if (audioContext.decodeAudioData) {
-    // 	audioContext.decodeAudioData(
-    // 		data,
-    // 		buffer => {
-    // 			source.buffer = buffer;
-    // 			createAudio();
-    // 		},
-    // 		e => {
-    // 			console.log(e);
-    // 			$('#loading').text('cannot decode mp3');
-    // 		}
-    // 	);
-    // } else {
-    // 	source.buffer = audioContext.createBuffer(data, false);
+    });
+  }
+
+  function initAudio(data) {
+    // navigator.mediaDevices
+    // .getUserMedia({ audio: true, video: false })
+    // .then((stream) => {
+    // 	audioContext = new window.AudioContext();
+    // 	source = audioContext.createMediaStreamSource(stream);
     // 	createAudio();
-    // }
+    // });
+    audioContext = new window.AudioContext();
+    source = audioContext.createBufferSource();
+
+    if (audioContext.decodeAudioData) {
+      audioContext.decodeAudioData(data, function (buffer) {
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+        mic = false;
+        createAudio();
+      }, function (e) {
+        console.log(e);
+        $('#loading').text('cannot decode mp3');
+      });
+    } else {
+      source.buffer = audioContext.createBuffer(data, false);
+      mic = false;
+      createAudio();
+    }
   }
 
   function createAudio() {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 1024;
-    analyser.smoothingTimeConstant = 0.1; // source.connect(audioContext.destination);
-
-    source.connect(analyser); // source.start(0);
-    // source.loop = true;
+    analyser.smoothingTimeConstant = 0.1;
+    source.connect(analyser); // source.loop = true;
 
     startViz();
   }
 
   function startViz() {
     $('#loading').hide();
-    LoopVisualizer = (0, _visualizer.default)(scene, analyser);
+    LoopVisualizer = (0, _visualizer.default)(scene, analyser, mic);
     LoopVisualizer.init();
 
     if (!started) {
@@ -769,11 +788,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _dayjs.default.locale('es'); // visualizer();
 
 
+var started = false;
+
 window.onload = function () {
   window.addEventListener('click', function () {
     // initVisualizer();
-    (0, _visualizer.default)();
-    (0, _speech.default)();
+    if (!started) {
+      (0, _visualizer.default)();
+      (0, _speech.default)();
+      started = true;
+    }
   });
 };
 },{"dayjs":"../node_modules/dayjs/dayjs.min.js","dayjs/locale/es":"../node_modules/dayjs/locale/es.js","./core/speech":"core/speech/index.js","./core/visualizer":"core/visualizer/index.js"}],"../../../.nvm/versions/node/v8.11.2/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {

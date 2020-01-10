@@ -1,6 +1,6 @@
 import ImprovedNoise from './improvedNoise';
 
-const LoopVisualizer = (scene, analyser) => {
+const LoopVisualizer = (scene, analyser, mic) => {
   const RINGCOUNT = 60;
   const SEPARATION = 30;
   const INIT_RADIUS = 50;
@@ -114,7 +114,8 @@ const LoopVisualizer = (scene, analyser) => {
     // console.log('aveLevel', aveLevel);
     const scaled_average = (aveLevel / 256) * VOL_SENS; //256 is the highest a level can be
     // console.log('scaled_average', scaled_average * 2);
-    levels.push(scaled_average * 2);
+    const aveOffset = mic ? 2 : 1;
+    levels.push(scaled_average * aveOffset);
     // levels.push(scaled_average);
     
     //read waveform into timeByteData
@@ -146,7 +147,8 @@ const LoopVisualizer = (scene, analyser) => {
       const ringId = RINGCOUNT - i - 1;
 
 
-      const normLevel = levels[ringId] + 0.3; //avoid scaling by 0
+      const offset = mic ? 0.3 : 0.01;
+      const normLevel = levels[ringId] + offset; //avoid scaling by 0
       // console.log(normLevel);
       const hue = colors[i];
 
