@@ -1,4 +1,10 @@
 import dayjs from 'dayjs';
+import Artyom from 'artyom.js';
+// import { debounce } from '../helpers/helper-util';
+import debounce from 'lodash/debounce';
+
+// Create a variable that stores your instance
+const artyom = new Artyom();
 
 export default () => {
   const speech = new p5.Speech();
@@ -37,9 +43,9 @@ export default () => {
     }, 3000);
   }
 
-  const a = "José";
+  // const a = "José";
 
-  function hi() {
+  function hi(a) {
     speech.speak(`Hola ${a}`);
   }
 
@@ -87,42 +93,104 @@ export default () => {
     speech.speak(dayjs().format('dddd D [de] MMMM [del] YYYY'));
   };
 
-  if (annyang) {
-    // Let's define a command.
-    annyang.setLanguage('es-MX');
-    const commands = {
-      'commands': loc,
-      '(otro) hola (chuy)': hi,
-      'adiós (chuy)': bye,
-      '(chuy) busca *something': search,
-      '(chuy) abre *website': searchWebsite,
-      'repite *saysome': saysome,
-      'cierra la pestaña': ctab,
-      'qué hora es': hour,
-      'qué fecha es': date,
-      // 'cuéntame un chiste': joke,
-      // 'cuéntame otro chiste': anotherjoke,
-      '(chuy) cómo estás': how,
-      'quién soy yo': who
+  // if (annyang) {
+  //   // Let's define a command.
+  //   annyang.setLanguage('es-MX');
+  //   const commands = {
+  //     'commands': loc,
+  //     '(otro) hola (chuy)': hi,
+  //     'adiós (chuy)': bye,
+  //     '(chuy) busca *something': search,
+  //     '(chuy) abre *website': searchWebsite,
+  //     'repite *saysome': saysome,
+  //     'cierra la pestaña': ctab,
+  //     'qué hora es': hour,
+  //     'qué fecha es': date,
+  //     // 'cuéntame un chiste': joke,
+  //     // 'cuéntame otro chiste': anotherjoke,
+  //     '(chuy) cómo estás': how,
+  //     'quién soy yo': who
+  //   };
+  //   // Add our commands to annyang
+  //   annyang.addCommands(commands);
 
-    };
-    // Add our commands to annyang
-    annyang.addCommands(commands);
+  //   annyang.debug(true);
 
-    annyang.debug(true);
+  //   annyang.addCallback('resultMatch', function(userSaid, commandText, phrases) {
+  //     console.log('resultMatch');
+  //     console.log(userSaid);
+  //     console.log(commandText);
+  //     console.log(phrases);
+  //   });
 
-    annyang.addCallback('resultMatch', function(userSaid, commandText, phrases) {
-      console.log('resultMatch');
-      console.log(userSaid);
-      console.log(commandText);
-      console.log(phrases);
-    });
+  //   annyang.addCallback('result', function(userSaid, commandText, phrases) {
+  //     console.log('resultMatch');
+  //     console.log(userSaid);
+  //   });
 
-    annyang.addCallback('result', function(userSaid, commandText, phrases) {
-      console.log('resultMatch');
-      console.log(userSaid);
-    });
+  //   annyang.start();
+  // }
 
-    annyang.start();
+  // // Add some commandsDemostrations in the normal way
+  // artyom.addCommands([
+  //   {
+  //       indexes: [/hola|Hola/g],
+  //       smart:true,
+  //       action: (i,wildcard) => {
+  //           console.log(i, wildcard)
+  //           artyom.say("Dijiste: "+ wildcard, {
+  //             lang: "es-MX",
+  //           });
+  //       }
+  //   },
+  // ]);
+
+  // // Start the commands !
+  // artyom.initialize({
+  //   lang: "es-MX", // GreatBritain english
+  //   continuous: true, // Listen forever
+  //   soundex: true,// Use the soundex algorithm to increase accuracy
+  //   debug: true, // Show messages in the console
+  //   // executionKeyword: "and do it now",
+  //   listen: true, // Start to listen commands !
+
+  //   // If providen, you can only trigger a command if you say its name
+  //   // e.g to trigger Good Morning, you need to say "Jarvis Good Morning"
+  //   // name: "Jarvis" 
+  // }).then(() => {
+  //   console.log("Artyom has been succesfully initialized");
+  // }).catch((err) => {
+  //   console.error("Artyom couldn't be initialized: ", err);
+  // });
+  window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+  let finalTranscript = '';
+  let recognition = new window.SpeechRecognition();
+
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 10;
+  recognition.continuous = true;
+  recognition.lang = "es-MX";
+
+  const onSpeech = (speech) => {
+    console.log('speech', speech);
   }
+
+  const debounced = debounce(onSpeech, 2000);
+
+  recognition.onresult = (event) => {
+    let interimTranscript = '';
+    for (let i = event.resultIndex, len = event.results.length; i < len; i++) {
+      let transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        console.log('isFinal', interimTranscript);
+        debounced(interimTranscript);
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+    debounced(interimTranscript);
+
+    console.log('interimTranscript', interimTranscript);
+  }
+  recognition.start();
 }

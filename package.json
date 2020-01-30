@@ -25,7 +25,9 @@
     "postcss-uncss": "^0.17.0"
   },
   "dependencies": {
+    "artyom.js": "^1.0.6",
     "dayjs": "^1.8.19",
+    "lodash": "^4.17.15",
     "shifty": "^2.8.3"
   }
 }
